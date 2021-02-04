@@ -5,10 +5,12 @@ services:
     ports:
       - "80:80"
       - "443:443"
+    container_name: proxy
     volumes:
       - ./ssl:/etc/nginx/certs
       - ./vhost:/etc/nginx/vhost.d
       - ./html:/usr/share/nginx/html
+      - ./dhparam:/etc/nginx/dhparam
       - /var/run/docker.sock:/tmp/docker.sock:ro
     restart: always
     networks:
@@ -18,11 +20,13 @@ services:
   ssl:
     image: jrcs/letsencrypt-nginx-proxy-companion
     restart: always
+    depends_on:
+      - proxy
     volumes:
       - ./ssl:/etc/nginx/certs
-      - ./vhost:/etc/nginx/vhost.d
+      - ./vhost:/etc/nginx/vhost.d:rw
       - ./html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     environment:
       NGINX_PROXY_CONTAINER: proxy
 
